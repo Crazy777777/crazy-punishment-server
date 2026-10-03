@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Crazy Punishment Scanner</title>
+<style>
+:root{--bg:#0e0717;--card:#171024;--purple:#7c3aed;--purple2:#a855f7;--text:#f5f3ff;--muted:#b8accb}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#25103d 0,#0e0717 48%);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{width:min(900px,100%);background:rgba(23,16,36,.96);border:1px solid #3b2454;border-radius:18px;padding:28px;box-shadow:0 20px 70px rgba(0,0,0,.45)}
+h1{margin:0 0 8px;font-size:28px}.sub{color:var(--muted);margin-bottom:24px}
+.row{display:flex;gap:10px}.row input{flex:1}
+input{background:#0e0916;border:1px solid #49315e;color:white;border-radius:10px;padding:14px;font-size:17px;outline:none}
+button{border:0;border-radius:10px;padding:14px 20px;background:var(--purple);color:white;font-weight:700;cursor:pointer}button:hover{background:#9333ea}
+#status{margin-top:16px;color:var(--muted)}pre{margin-top:20px;background:#0b0710;border:1px solid #35223f;border-radius:12px;padding:18px;overflow:auto;max-height:500px;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Crazy Punishment Scanner</h1>
+  <div class="sub">Painel de resultados — digite o PIN recebido pelo scanner.</div>
+  <div class="row">
+    <input id="pin" maxlength="6" inputmode="numeric" placeholder="PIN de 6 dígitos">
+    <button onclick="buscar()">Buscar relatório</button>
+  </div>
+  <div id="status"></div>
+  <pre id="result" style="display:none"></pre>
+</div>
+<script>
+async function buscar(){
+  const pin=document.getElementById('pin').value.trim();
+  const status=document.getElementById('status');
+  const result=document.getElementById('result');
+  result.style.display='none';
+  if(!/^\d{6}$/.test(pin)){status.textContent='Digite um PIN com 6 números.';return;}
+  status.textContent='Buscando...';
+  try{
+    const r=await fetch('/api/result/'+pin);
+    const data=await r.json();
+    if(!r.ok){status.textContent=data.error||'Erro ao buscar relatório.';return;}
+    status.textContent='Relatório encontrado.';
+    result.textContent=JSON.stringify(data,null,2);
+    result.style.display='block';
+  }catch(e){
+    status.textContent='Erro de conexão com o servidor.';
+  }
+}
+document.getElementById('pin').addEventListener('keydown',e=>{if(e.key==='Enter')buscar()});
+</script>
+</body>
+</html>
